@@ -1,4 +1,5 @@
 import React from 'react';
+import { ThemeProvider } from 'styled-components';
 
 import PullQuote from './index';
 
@@ -8,10 +9,12 @@ export default {
 };
 
 export const DefaultWithAttribution = () => (
-  <PullQuote
-    attribution="First Last"
-    quote="All blue cheeses are made with the same species of mold, Penicillium roqueforti."
-  />
+  <ThemeProvider theme={{ siteKey: 'cco' }}>
+    <PullQuote
+      attribution="First Last"
+      quote="All blue cheeses are made with the same species of mold, Penicillium roqueforti."
+    />
+  </ThemeProvider>
 );
 
 export const DefaultWithoutAttribution = () => (
