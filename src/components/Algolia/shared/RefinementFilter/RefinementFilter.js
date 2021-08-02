@@ -214,9 +214,10 @@ const RefinementFilter = ({
         ) : null
       }
       <RefinementFilterCheckbox
-        id={`search-site-list--${value}`}
-        type="checkbox"
         defaultChecked={isRefined}
+        id={`${attribute}--${label}`}
+        name={label}
+        type="checkbox"
       />
       {
         attribute === 'search_site_list' ? (
