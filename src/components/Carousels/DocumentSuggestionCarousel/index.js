@@ -41,6 +41,10 @@ const DocumentListCarouselTheme = {
     .carousel {
       padding-top: 0;
     }
+
+    .carousel-cell:not(.is-selected) {
+      opacity: 0.5;
+    }
   `,
 };
 

@@ -25,43 +25,19 @@ export const SuggestionCardImg = styled.div.attrs({
 })`
   ${({ imageUrl }) => (imageUrl ? `
     background: no-repeat center center url("${imageUrl}");
+    min-height: 25rem;
   ` : '')}
   background-size: cover;
   overflow: hidden;
   position: relative;
   width: 100%;
 
-  img {
-    display: block;
-    max-width: 100%;
-    min-height: 100%;
-    width: auto;
-  }
-
   ${breakpoint('md', 'lg')`
-    flex: 0 0 25rem;
-
-    img {
-      margin-left: -50%;
-    }
-  `}
-
-  ${breakpoint('md')`
-    img {
-      position: absolute;
-      max-height: 100%;
-      max-width: none;
-    }
+    flex: 0 0 25rem;;
   `}
 
   ${breakpoint('lg')`
     flex: 0 0 41rem;
-
-    img {
-      max-height: none;
-      margin-top: -50%;
-      min-width: 100%;
-    }
   `}
 `;
 
@@ -118,6 +94,7 @@ export const SuggestionCardDek = styled.div.attrs({
 const SuggestionCardActions = styled.div.attrs({
   className: 'suggestion-card__buttons',
 })`
+  display: flex;
 
   button {
     font: 700 ${fontSize.sm}/1.64 ${font.msr};
@@ -126,14 +103,22 @@ const SuggestionCardActions = styled.div.attrs({
 
   ${breakpoint('md', 'lg')`
     flex-direction: column;
+
+    button {
+      width: 100%;
+      
+      &:first-child {
+        margin-bottom: 0.8rem;
+      }
+    }
   `}
 `;
 
 export const SuggestionCardAction = styled.button.attrs({
-  className: 'suggestion-card__buttons',
+  className: 'suggestion-card__button',
 })`
   align-items: center;
-  display: inline-flex;
+  display: flex;
   height: 4rem;
   justify-content: center;
   vertical-align: middle;
@@ -204,13 +189,9 @@ const SuggestionCard = ({
   subtitle,
   title,
 }) => (
-  <SuggestionCardWrapper
-    data-document-title={title}
-    data-href={href}
-    data-object-id={objectId}
-  >
+  <SuggestionCardWrapper>
     <SuggestionCardImg
-      data-testid="suggestion-img"
+      data-testid={`suggestion-img-${Boolean(imageUrl)}`}
       imageUrl={imageUrl}
     >
       <SuggestionCardBadge
@@ -242,6 +223,9 @@ const SuggestionCard = ({
       <SuggestionCardActions>
         <SuggestionCardAction
           className="skip remove-cell"
+          data-document-title={title}
+          data-href={href}
+          data-object-id={objectId}
           data-testid="suggestion-action__skip"
         >
           <Close
