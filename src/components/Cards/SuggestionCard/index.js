@@ -4,12 +4,11 @@ import styled from 'styled-components';
 import breakpoint from 'styled-components-breakpoint';
 
 import Badge from '../../Badge';
-import Image from '../shared/Image';
 import { FavoriteRibbon } from '../../DesignTokens/Icon';
 import { color, font, fontSize, lineHeight, spacing } from '../../../styles';
 import { Close } from '../../DesignTokens/Icon/svgs';
 
-const SuggestionCardLink = styled.a.attrs({
+const SuggestionCardWrapper = styled.div.attrs({
   className: 'suggestion-card',
 })`
   background: ${color.whiteSmoke};
@@ -24,33 +23,17 @@ const SuggestionCardLink = styled.a.attrs({
 export const SuggestionCardImg = styled.div.attrs({
   className: 'suggestion-card__img',
 })`
+  ${({ imageUrl }) => (imageUrl ? `
+    background: no-repeat center center url("${imageUrl}");
+    min-height: 25rem;
+  ` : '')}
+  background-size: cover;
   overflow: hidden;
   position: relative;
   width: 100%;
 
-  .no-image & {
-    background: transparent;
-    display: flex;
-    align-items: center;
-    margin-bottom: ${spacing.xxsm};
-  }
-
-  img {
-    display: block;
-    max-width: 100%;
-    min-height: 100%;
-    width: auto;
-  }
-
   ${breakpoint('md', 'lg')`
-    flex: 0 0 25rem;
-
-    img {
-      position: absolute;
-      margin-left: -50%;
-      max-height: 100%;
-      max-width: none;
-    }
+    flex: 0 0 25rem;;
   `}
 
   ${breakpoint('lg')`
@@ -87,7 +70,7 @@ export const SuggestionCardContent = styled.div.attrs({
   `}
 `;
 
-export const SuggestionCardTitle = styled.p.attrs({
+export const SuggestionCardTitle = styled.a.attrs({
   className: 'suggestion-card__title',
 })`
   font: 700 ${fontSize.md}/${lineHeight.md} ${font.msr};
@@ -102,8 +85,8 @@ export const SuggestionCardSubTitle = styled.span.attrs({
   margin-bottom: ${spacing.xsm};
 `;
 
-export const SuggestionCardDescription = styled.p.attrs({
-  className: 'suggestion-card__description',
+export const SuggestionCardDek = styled.div.attrs({
+  className: 'suggestion-card__dek',
 })`
   margin-bottom: ${spacing.sm};
 `;
@@ -111,19 +94,31 @@ export const SuggestionCardDescription = styled.p.attrs({
 const SuggestionCardActions = styled.div.attrs({
   className: 'suggestion-card__buttons',
 })`
-  font-family: ${font.msr};
-  font-weight: bold;
+  display: flex;
+
+  button {
+    font: 700 ${fontSize.sm}/1.64 ${font.msr};
+    white-space: nowrap;
+  }
 
   ${breakpoint('md', 'lg')`
     flex-direction: column;
+
+    button {
+      width: 100%;
+      
+      &:first-child {
+        margin-bottom: 0.8rem;
+      }
+    }
   `}
 `;
 
 export const SuggestionCardAction = styled.button.attrs({
-  className: 'suggestion-card__buttons',
+  className: 'suggestion-card__button',
 })`
   align-items: center;
-  display: inline-flex;
+  display: flex;
   height: 4rem;
   justify-content: center;
   vertical-align: middle;
@@ -158,7 +153,7 @@ export const SuggestionCardAction = styled.button.attrs({
     }
   }
 
-  &.favorite {
+  &.favorite-action {
     background-color: ${color.mint};
     border: 1px solid ${color.mint};
     color: ${color.white};
@@ -167,34 +162,38 @@ export const SuggestionCardAction = styled.button.attrs({
       background-color: ${color.darkerMint};
       border: 1px solid ${color.darkerMint};
     }
+
+    &:not(.favorited) {
+      svg {
+        .favorite-ribbon__ribbon {
+          display: none;
+        }
+      }
+    }
+
+    &.favorited {
+      [class*="vertical-line"],
+      [class*="horizontal-line"] {
+        stroke: white;
+      }
+    }
   }
 `;
 
 const SuggestionCard = ({
-  description,
+  dek,
   href,
-  imageAlt,
   imageUrl,
   objectId,
-  onFavoriteClick,
-  onSkipClick,
   siteKey,
   subtitle,
   title,
 }) => (
-  <SuggestionCardLink
-    href={href}
-  >
+  <SuggestionCardWrapper>
     <SuggestionCardImg
-      data-testid="suggestion-img"
+      data-testid={`suggestion-img-${Boolean(imageUrl)}`}
+      imageUrl={imageUrl}
     >
-      { imageUrl ? (
-        <Image
-          aria-hidden="true"
-          imageAlt={imageAlt}
-          imageUrl={imageUrl}
-        />
-      ) : null }
       <SuggestionCardBadge
         type={siteKey}
       />
@@ -202,6 +201,7 @@ const SuggestionCard = ({
     <SuggestionCardContent>
       <SuggestionCardTitle
         data-testid="suggestion-title"
+        href={href}
       >
         {title}
       </SuggestionCardTitle>
@@ -212,21 +212,21 @@ const SuggestionCard = ({
           {subtitle}
         </SuggestionCardSubTitle>
       )}
-      {description && (
-        <SuggestionCardDescription
-          data-testid="suggestion-description"
-        >
-          {description}
-        </SuggestionCardDescription>
+      {dek && (
+        <SuggestionCardDek
+          data-testid="suggestion-dek"
+          dangerouslySetInnerHTML={{
+            __html: dek,
+          }}
+        />
       )}
       <SuggestionCardActions>
         <SuggestionCardAction
-          className="skip"
+          className="skip remove-cell"
+          data-document-title={title}
+          data-href={href}
+          data-object-id={objectId}
           data-testid="suggestion-action__skip"
-          onClick={(evt) => {
-            evt.preventDefault();
-            onSkipClick();
-          }}
         >
           <Close
             ariaHidden
@@ -236,15 +236,11 @@ const SuggestionCard = ({
           Not for me
         </SuggestionCardAction>
         <SuggestionCardAction
-          className="favorite"
+          className="favorite-action"
           data-document-title={title}
           data-favoritable-id={objectId}
           data-origin-site={siteKey}
           data-testid="suggestion-action__favorite"
-          onClick={(evt) => {
-            evt.preventDefault();
-            onFavoriteClick();
-          }}
         >
           <FavoriteRibbon
             ariaHidden
@@ -256,25 +252,21 @@ const SuggestionCard = ({
         </SuggestionCardAction>
       </SuggestionCardActions>
     </SuggestionCardContent>
-  </SuggestionCardLink>
+  </SuggestionCardWrapper>
 );
 
 SuggestionCard.propTypes = {
-  description: PropTypes.string,
+  dek: PropTypes.string,
   href: PropTypes.string.isRequired,
-  imageAlt: PropTypes.string,
   imageUrl: PropTypes.string,
   objectId: PropTypes.string.isRequired,
-  onSkipClick: PropTypes.func.isRequired,
-  onFavoriteClick: PropTypes.func.isRequired,
   siteKey: PropTypes.string.isRequired,
   subtitle: PropTypes.string,
   title: PropTypes.string.isRequired,
 };
 
 SuggestionCard.defaultProps = {
-  description: null,
-  imageAlt: null,
+  dek: null,
   imageUrl: null,
   subtitle: null,
 };
